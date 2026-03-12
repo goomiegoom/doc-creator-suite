@@ -109,7 +109,7 @@ export function VoucherPreview({ data }: Props) {
       <div className="flex justify-between text-sm mt-8">
         <div className="text-center">
           <div className="mb-8">ลงชื่อ.........................................(ผู้รับเงิน)</div>
-          <div>({data.payee?.name || "......................................."})</div>
+          <div>({data.payee ? `${data.payee.prefix}${data.payee.name}` : "......................................."})</div>
         </div>
         <div className="text-center">
           {data.signatureUrl ? (
