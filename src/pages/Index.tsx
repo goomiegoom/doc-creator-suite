@@ -97,12 +97,29 @@ export default function Index() {
     if (!printContent) return;
     const win = window.open("", "_blank");
     if (!win) return;
+
+    // Collect all stylesheets from current document
+    const styleSheets = Array.from(document.styleSheets);
+    let cssText = "";
+    styleSheets.forEach((sheet) => {
+      try {
+        const rules = Array.from(sheet.cssRules);
+        rules.forEach((rule) => { cssText += rule.cssText + "\n"; });
+      } catch {
+        // Cross-origin stylesheet — include via link tag
+        if (sheet.href) {
+          cssText += `@import url("${sheet.href}");\n`;
+        }
+      }
+    });
+
     win.document.write(`
       <html><head><title>ใบสำคัญรับเงิน ${data.docNo}</title>
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
       <style>
+        ${cssText}
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Sarabun', sans-serif; }
+        body { font-family: 'Sarabun', sans-serif; background: white; }
         @page { size: A4; margin: 15mm; }
         @media print { body { -webkit-print-color-adjust: exact; } }
       </style></head><body>${printContent.innerHTML}</body></html>
