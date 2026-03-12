@@ -82,15 +82,35 @@ export function VoucherForm({ payees, data, onChange, onManagePayees }: VoucherF
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <Label className="text-xs">เลือกจากฐานข้อมูล</Label>
-            <Select value={data.payee?.id || ""} onValueChange={selectPayee}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="เลือกผู้รับเงิน..." /></SelectTrigger>
-              <SelectContent>
-                {payees.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.prefix}{p.name} {p.codename && `(${p.codename})`}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-xs">ค้นหาผู้รับเงิน (ชื่อ / codename)</Label>
+            <Popover open={payeeOpen} onOpenChange={setPayeeOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" aria-expanded={payeeOpen} className="w-full h-9 text-sm justify-between font-normal">
+                  {data.payee ? `${data.payee.prefix}${data.payee.name}${data.payee.codename ? ` (${data.payee.codename})` : ""}` : "เลือกผู้รับเงิน..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="พิมพ์ชื่อ หรือ codename..." />
+                  <CommandList>
+                    <CommandEmpty>ไม่พบผู้รับเงิน</CommandEmpty>
+                    <CommandGroup>
+                      {payees.map((p) => (
+                        <CommandItem
+                          key={p.id}
+                          value={`${p.prefix}${p.name} ${p.codename} ${p.nameEn}`}
+                          onSelect={() => { selectPayee(p.id); setPayeeOpen(false); }}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", data.payee?.id === p.id ? "opacity-100" : "opacity-0")} />
+                          {p.prefix}{p.name} {p.codename && <span className="text-muted-foreground ml-1">({p.codename})</span>}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           {data.payee && (
             <div className="space-y-2 rounded-md border border-border bg-muted/50 p-3 text-sm">
