@@ -36,7 +36,7 @@ export function VoucherPreview({ data }: Props) {
       {/* Header with Logo */}
       <div className="text-center mb-1">
         {data.logoUrl ? (
-          <img src={data.logoUrl} alt="Company Logo" className="mx-auto mb-2" style={{ maxHeight: "60px" }} crossOrigin="anonymous" />
+          <img src={data.logoUrl} alt="Company Logo" className="mx-auto mb-2" style={{ maxHeight: "60px" }} referrerPolicy="no-referrer" />
         ) : (
           <div className="text-xs tracking-[0.3em] text-gray-500 uppercase">Mentora Consulting</div>
         )}
@@ -114,7 +114,7 @@ export function VoucherPreview({ data }: Props) {
         <div className="text-center">
           {data.signatureUrl ? (
             <div className="mb-2">
-              <img src={data.signatureUrl} alt="ลายเซ็น" className="mx-auto" style={{ maxHeight: "50px" }} crossOrigin="anonymous" />
+              <img src={data.signatureUrl} alt="ลายเซ็น" className="mx-auto" style={{ maxHeight: "50px" }} referrerPolicy="no-referrer" />
             </div>
           ) : (
             <div className="mb-8">ลงชื่อ.........................................(ผู้จ่ายเงิน)</div>
