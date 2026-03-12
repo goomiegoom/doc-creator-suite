@@ -130,15 +130,15 @@ export function VoucherForm({ payees, data, onChange, onManagePayees }: VoucherF
         <CardContent className="space-y-2">
           {data.lineItems.map((item, i) => (
             <div key={i} className="flex gap-2 items-end">
-              <div className="flex-1">
+              <div className="flex-[3]">
                 {i === 0 && <Label className="text-xs">รายการ</Label>}
                 <Input value={item.description} onChange={(e) => updateLineItem(i, "description", e.target.value)} placeholder="รายละเอียด" className="h-9 text-sm" />
               </div>
-              <div className="w-28">
+              <div className="flex-[2]">
                 {i === 0 && <Label className="text-xs">จำนวนเงิน</Label>}
                 <Input type="number" value={item.amount || ""} onChange={(e) => updateLineItem(i, "amount", parseFloat(e.target.value) || 0)} placeholder="0.00" className="h-9 text-sm text-right" />
               </div>
-              <div className="w-24">
+              <div className="flex-1">
                 {i === 0 && <Label className="text-xs">หมายเหตุ</Label>}
                 <Input value={item.notes} onChange={(e) => updateLineItem(i, "notes", e.target.value)} className="h-9 text-sm" />
               </div>
