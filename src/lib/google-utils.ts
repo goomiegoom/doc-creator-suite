@@ -51,22 +51,34 @@ export function sheetToCsvUrl(url: string, gid = "0"): string {
 
 /**
  * Parse CSV text into Payee objects
- * Expected columns: ชื่อ-นามสกุล, เลขผู้เสียภาษี, ที่อยู่, ประเภท, อัตรา WHT %
+ * Sheet "Payees" columns: Tax ID, Pref., Thai Name, English Name, Codename, Address, Bank, Branch, Account no.
  */
 export function parseCsvToPayees(csv: string): Payee[] {
   const lines = csv.split("\n").filter((l) => l.trim());
   if (lines.length < 2) return [];
   
-  // Skip header row
   return lines.slice(1).map((line, i) => {
-    const cols = parseCsvLine(line);
+    const cols = parseCsvLine(line).map((c) => c.replace(/"/g, "").trim());
+    const taxIdRaw = cols[0] || "";
+    // Handle scientific notation from Excel (e.g., 1.3994E+12)
+    let taxId = taxIdRaw;
+    if (taxIdRaw.includes("E+") || taxIdRaw.includes("e+")) {
+      taxId = Number(taxIdRaw).toFixed(0);
+    }
+    
     return {
       id: `sheet-${i}`,
-      name: cols[0]?.replace(/"/g, "").trim() || "",
-      taxId: cols[1]?.replace(/"/g, "").trim() || "",
-      address: cols[2]?.replace(/"/g, "").trim() || "",
-      type: cols[3]?.replace(/"/g, "").trim() || "บุคคลธรรมดา",
-      whtRate: parseFloat(cols[4]?.replace(/["%]/g, "").trim()) || 3,
+      taxId,
+      prefix: cols[1] || "",
+      name: cols[2] || "",
+      nameEn: cols[3] || "",
+      codename: cols[4] || "",
+      address: cols[5] || "",
+      bank: cols[6] || "",
+      branch: cols[7] || "",
+      accountNo: cols[8] || "",
+      type: "บุคคลธรรมดา",
+      whtRate: 3,
     };
   }).filter((p) => p.name);
 }
