@@ -11,9 +11,13 @@ import { Printer, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 const today = new Date().toISOString().split("T")[0];
+const now = new Date();
+const buddhistYear = now.getFullYear() + 543;
+const month = String(now.getMonth() + 1).padStart(2, "0");
+const defaultDocNo = `PV-${buddhistYear}-${month}01`;
 
 const initialData: VoucherData = {
-  docNo: "",
+  docNo: defaultDocNo,
   date: today,
   paymentMethod: "โอนเงิน",
   payee: null,
