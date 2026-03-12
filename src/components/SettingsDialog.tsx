@@ -71,7 +71,7 @@ export function SettingsDialog({ settings, onChange, onFetchPayees, isFetching, 
               </div>
               {logoPreview && (
                 <div className="border border-border rounded p-2 bg-muted/50">
-                  <img src={logoPreview} alt="Logo preview" className="max-h-16 mx-auto" crossOrigin="anonymous" />
+                  <img src={logoPreview} alt="Logo preview" className="max-h-16 mx-auto" referrerPolicy="no-referrer" />
                 </div>
               )}
             </CardContent>
