@@ -22,4 +22,12 @@ export interface VoucherData {
   whtRate: number;
   payerName: string;
   payerCompany: string;
+  logoUrl: string;
+  signatureUrl: string;
+}
+
+export interface AppSettings {
+  googleSheetUrl: string;
+  logoGdriveUrl: string;
+  signatureGdriveUrl: string;
 }
