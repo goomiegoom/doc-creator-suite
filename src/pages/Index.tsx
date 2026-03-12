@@ -1,11 +1,14 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { VoucherForm } from "@/components/VoucherForm";
 import { VoucherPreview } from "@/components/VoucherPreview";
 import { PayeeManager } from "@/components/PayeeManager";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { defaultPayees } from "@/data/payees";
-import { Payee, VoucherData } from "@/types/voucher";
-import { Printer, FileDown } from "lucide-react";
+import { Payee, VoucherData, AppSettings } from "@/types/voucher";
+import { sheetToCsvUrl, parseCsvToPayees, gdriveToDirectUrl } from "@/lib/google-utils";
+import { Printer, Settings } from "lucide-react";
+import { toast } from "sonner";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -18,12 +21,57 @@ const initialData: VoucherData = {
   whtRate: 3,
   payerName: "วริษา เกตุพันธุ์",
   payerCompany: "บริษัท เมนทอรา คอนซัลติง กรุ๊ป จำกัด",
+  logoUrl: "",
+  signatureUrl: "",
+};
+
+const initialSettings: AppSettings = {
+  googleSheetUrl: "",
+  logoGdriveUrl: "",
+  signatureGdriveUrl: "",
 };
 
 export default function Index() {
   const [payees, setPayees] = useState<Payee[]>(defaultPayees);
   const [data, setData] = useState<VoucherData>(initialData);
   const [payeeDialogOpen, setPayeeDialogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<AppSettings>(initialSettings);
+  const [isFetching, setIsFetching] = useState(false);
+
+  // Derive image URLs from settings
+  const logoUrl = gdriveToDirectUrl(settings.logoGdriveUrl);
+  const signatureUrl = gdriveToDirectUrl(settings.signatureGdriveUrl);
+
+  // Update voucher data with derived URLs
+  const voucherData: VoucherData = { ...data, logoUrl, signatureUrl };
+
+  const fetchPayeesFromSheet = async () => {
+    if (!settings.googleSheetUrl) return;
+    setIsFetching(true);
+    try {
+      const csvUrl = sheetToCsvUrl(settings.googleSheetUrl);
+      if (!csvUrl) {
+        toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
+        return;
+      }
+      const res = await fetch(csvUrl);
+      if (!res.ok) throw new Error("Fetch failed");
+      const csv = await res.text();
+      const newPayees = parseCsvToPayees(csv);
+      if (newPayees.length === 0) {
+        toast.error("ไม่พบข้อมูลผู้รับเงินใน Sheet");
+        return;
+      }
+      setPayees(newPayees);
+      toast.success(`ดึงข้อมูลผู้รับเงิน ${newPayees.length} รายการสำเร็จ`);
+    } catch (err) {
+      console.error(err);
+      toast.error("ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ ตรวจสอบว่า Publish to web แล้ว");
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const handlePrint = () => {
     const printContent = document.getElementById("voucher-print");
@@ -46,20 +94,22 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
       <header className="border-b border-border bg-background px-6 py-3 flex items-center justify-between sticky top-0 z-10">
         <div>
           <h1 className="text-lg font-bold">🧾 Mentora Document Maker</h1>
           <p className="text-xs text-muted-foreground">ระบบสร้างใบสำคัญรับเงิน</p>
         </div>
-        <Button onClick={handlePrint} size="sm">
-          <Printer className="mr-2 h-4 w-4" /> พิมพ์ / PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
+            <Settings className="mr-2 h-4 w-4" /> ตั้งค่า
+          </Button>
+          <Button onClick={handlePrint} size="sm">
+            <Printer className="mr-2 h-4 w-4" /> พิมพ์ / PDF
+          </Button>
+        </div>
       </header>
 
-      {/* Main layout */}
       <div className="flex gap-4 p-4 max-w-[1600px] mx-auto" style={{ height: "calc(100vh - 57px)" }}>
-        {/* Left: Form */}
         <div className="w-[420px] shrink-0 overflow-y-auto pr-1">
           <VoucherForm
             payees={payees}
@@ -68,15 +118,21 @@ export default function Index() {
             onManagePayees={() => setPayeeDialogOpen(true)}
           />
         </div>
-
-        {/* Right: Preview */}
         <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-muted/50 p-4">
           <div className="text-xs text-muted-foreground mb-2 text-center">ตัวอย่างเอกสาร (Live Preview)</div>
-          <VoucherPreview data={data} />
+          <VoucherPreview data={voucherData} />
         </div>
       </div>
 
       <PayeeManager payees={payees} onChange={setPayees} open={payeeDialogOpen} onOpenChange={setPayeeDialogOpen} />
+      <SettingsDialog
+        settings={settings}
+        onChange={setSettings}
+        onFetchPayees={fetchPayeesFromSheet}
+        isFetching={isFetching}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { VoucherData } from "@/types/voucher";
 import { subtotal, wht, netAmount } from "./VoucherForm";
 import { thaiBahtText } from "@/lib/thai-baht-text";
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
 
 interface Props {
   data: VoucherData;
@@ -35,9 +33,13 @@ export function VoucherPreview({ data }: Props) {
 
   return (
     <div id="voucher-print" className="bg-white text-black p-8 max-w-[210mm] mx-auto shadow-lg" style={{ fontFamily: "'Sarabun', 'Noto Sans Thai', sans-serif", fontSize: "13px", lineHeight: "1.6" }}>
-      {/* Header */}
+      {/* Header with Logo */}
       <div className="text-center mb-1">
-        <div className="text-xs tracking-[0.3em] text-gray-500 uppercase">Mentora Consulting</div>
+        {data.logoUrl ? (
+          <img src={data.logoUrl} alt="Company Logo" className="mx-auto mb-2" style={{ maxHeight: "60px" }} crossOrigin="anonymous" />
+        ) : (
+          <div className="text-xs tracking-[0.3em] text-gray-500 uppercase">Mentora Consulting</div>
+        )}
         <h1 className="text-xl font-bold mt-1">ใบสำคัญรับเงิน</h1>
       </div>
 
@@ -103,14 +105,20 @@ export function VoucherPreview({ data }: Props) {
         [{data.paymentMethod === "โอนเงิน" ? "X" : " "}] โอนเงิน
       </div>
 
-      {/* Signatures */}
+      {/* Signatures with signature image */}
       <div className="flex justify-between text-sm mt-8">
         <div className="text-center">
           <div className="mb-8">ลงชื่อ.........................................(ผู้รับเงิน)</div>
           <div>({data.payee?.name || "......................................."})</div>
         </div>
         <div className="text-center">
-          <div className="mb-8">ลงชื่อ.........................................(ผู้จ่ายเงิน)</div>
+          {data.signatureUrl ? (
+            <div className="mb-2">
+              <img src={data.signatureUrl} alt="ลายเซ็น" className="mx-auto" style={{ maxHeight: "50px" }} crossOrigin="anonymous" />
+            </div>
+          ) : (
+            <div className="mb-8">ลงชื่อ.........................................(ผู้จ่ายเงิน)</div>
+          )}
           <div>( {data.payerName} )</div>
         </div>
       </div>
