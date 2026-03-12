@@ -83,16 +83,17 @@ export function VoucherForm({ payees, data, onChange, onManagePayees }: VoucherF
               <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="เลือกผู้รับเงิน..." /></SelectTrigger>
               <SelectContent>
                 {payees.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  <SelectItem key={p.id} value={p.id}>{p.prefix}{p.name} {p.codename && `(${p.codename})`}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           {data.payee && (
             <div className="space-y-2 rounded-md border border-border bg-muted/50 p-3 text-sm">
-              <div><span className="text-muted-foreground">ชื่อ:</span> {data.payee.name}</div>
+              <div><span className="text-muted-foreground">ชื่อ:</span> {data.payee.prefix}{data.payee.name}</div>
               <div><span className="text-muted-foreground">เลขภาษี:</span> {data.payee.taxId}</div>
               <div><span className="text-muted-foreground">ที่อยู่:</span> {data.payee.address}</div>
+              {data.payee.codename && <div><span className="text-muted-foreground">Codename:</span> {data.payee.codename}</div>}
             </div>
           )}
         </CardContent>
