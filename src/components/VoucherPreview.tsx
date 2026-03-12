@@ -52,7 +52,7 @@ export function VoucherPreview({ data }: Props) {
       {/* Payee info */}
       <div className="mb-2 text-sm space-y-1">
         <div>
-          ข้าพเจ้า: <span className="font-semibold">{data.payee?.name || "___________________________"}</span>
+          ข้าพเจ้า: <span className="font-semibold">{data.payee ? `${data.payee.prefix}${data.payee.name}` : "___________________________"}</span>
           <span className="text-gray-500 ml-1">(ผู้ขายสินค้า/ให้บริการ)</span>
           <span className="ml-4">เลขประจำตัวผู้เสียภาษี: <span className="font-semibold">{data.payee ? formatTaxId(data.payee.taxId) : "_ ____ _____ __ _"}</span></span>
         </div>
@@ -109,7 +109,7 @@ export function VoucherPreview({ data }: Props) {
       <div className="flex justify-between text-sm mt-8">
         <div className="text-center">
           <div className="mb-8">ลงชื่อ.........................................(ผู้รับเงิน)</div>
-          <div>({data.payee?.name || "......................................."})</div>
+          <div>({data.payee ? `${data.payee.prefix}${data.payee.name}` : "......................................."})</div>
         </div>
         <div className="text-center">
           {data.signatureUrl ? (

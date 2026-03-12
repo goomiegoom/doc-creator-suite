@@ -1,8 +1,14 @@
 export interface Payee {
   id: string;
-  name: string;
   taxId: string;
+  prefix: string;
+  name: string;
+  nameEn: string;
+  codename: string;
   address: string;
+  bank: string;
+  branch: string;
+  accountNo: string;
   type: string;
   whtRate: number;
 }
