@@ -37,12 +37,20 @@ export function gdriveToDirectUrl(url: string): string {
 export function sheetToCsvUrl(url: string, gid = "0"): string {
   if (!url) return "";
   
+  // If already a published CSV URL, use as-is
+  if (url.includes("/pub") && url.includes("output=csv")) {
+    return url;
+  }
+  // If it's a /pub URL without output=csv, append it
+  if (url.includes("/pub")) {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}output=csv`;
+  }
+  
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (!match) return "";
   
   const sheetId = match[1];
-  
-  // Check if URL has gid
   const gidMatch = url.match(/gid=(\d+)/);
   const finalGid = gidMatch ? gidMatch[1] : gid;
   
