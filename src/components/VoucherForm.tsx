@@ -75,7 +75,7 @@ export function VoucherForm({ payees, data, onChange, onManagePayees }: VoucherF
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">👤 ผู้รับเงิน</CardTitle>
-            <Button variant="outline" size="sm" onClick={onManagePayees} className="h-7 text-xs">
+            <Button variant="default" size="sm" onClick={onManagePayees} className="h-7 text-xs">
               <UserPlus className="mr-1 h-3 w-3" /> จัดการผู้รับเงิน
             </Button>
           </div>
