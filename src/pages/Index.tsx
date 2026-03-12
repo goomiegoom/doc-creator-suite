@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { VoucherForm } from "@/components/VoucherForm";
 import { VoucherPreview } from "@/components/VoucherPreview";
@@ -25,32 +25,38 @@ const initialData: VoucherData = {
   signatureUrl: "",
 };
 
-const initialSettings: AppSettings = {
-  googleSheetUrl: "",
-  logoGdriveUrl: "",
-  signatureGdriveUrl: "",
-};
+function loadSettings(): AppSettings {
+  try {
+    const saved = localStorage.getItem("mentora-settings");
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return { googleSheetUrl: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
+}
 
 export default function Index() {
   const [payees, setPayees] = useState<Payee[]>(defaultPayees);
   const [data, setData] = useState<VoucherData>(initialData);
   const [payeeDialogOpen, setPayeeDialogOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState<AppSettings>(initialSettings);
+  const [settings, setSettings] = useState<AppSettings>(loadSettings);
   const [isFetching, setIsFetching] = useState(false);
+
+  // Persist settings
+  useEffect(() => {
+    localStorage.setItem("mentora-settings", JSON.stringify(settings));
+  }, [settings]);
 
   // Derive image URLs from settings
   const logoUrl = gdriveToDirectUrl(settings.logoGdriveUrl);
   const signatureUrl = gdriveToDirectUrl(settings.signatureGdriveUrl);
-
-  // Update voucher data with derived URLs
   const voucherData: VoucherData = { ...data, logoUrl, signatureUrl };
 
-  const fetchPayeesFromSheet = async () => {
-    if (!settings.googleSheetUrl) return;
+  const fetchPayeesFromSheet = useCallback(async (sheetUrl?: string) => {
+    const url = sheetUrl || settings.googleSheetUrl;
+    if (!url) return;
     setIsFetching(true);
     try {
-      const csvUrl = sheetToCsvUrl(settings.googleSheetUrl);
+      const csvUrl = sheetToCsvUrl(url);
       if (!csvUrl) {
         toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
         return;
@@ -71,7 +77,14 @@ export default function Index() {
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [settings.googleSheetUrl]);
+
+  // Auto-fetch on mount if sheet URL exists
+  useEffect(() => {
+    if (settings.googleSheetUrl) {
+      fetchPayeesFromSheet(settings.googleSheetUrl);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePrint = () => {
     const printContent = document.getElementById("voucher-print");
