@@ -61,19 +61,25 @@ export default function Index() {
         toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
         return;
       }
-      const res = await fetch(csvUrl);
-      if (!res.ok) throw new Error("Fetch failed");
+      let res: Response;
+      try {
+        res = await fetch(csvUrl);
+      } catch {
+        // CORS blocked — try via corsproxy
+        res = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csv = await res.text();
       const newPayees = parseCsvToPayees(csv);
       if (newPayees.length === 0) {
-        toast.error("ไม่พบข้อมูลผู้รับเงินใน Sheet");
+        toast.error("ไม่พบข้อมูลผู้รับเงินใน Sheet — ตรวจสอบว่า publish ถูก sheet");
         return;
       }
       setPayees(newPayees);
       toast.success(`ดึงข้อมูลผู้รับเงิน ${newPayees.length} รายการสำเร็จ`);
     } catch (err) {
-      console.error(err);
-      toast.error("ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ ตรวจสอบว่า Publish to web แล้ว");
+      console.error("Sheet fetch error:", err);
+      toast.error("ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ — ตรวจสอบว่า Publish to web (File → Share → Publish to web) แล้ว");
     } finally {
       setIsFetching(false);
     }

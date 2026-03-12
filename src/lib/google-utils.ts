@@ -46,7 +46,7 @@ export function sheetToCsvUrl(url: string, gid = "0"): string {
   const gidMatch = url.match(/gid=(\d+)/);
   const finalGid = gidMatch ? gidMatch[1] : gid;
   
-  return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${finalGid}`;
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/pub?output=csv&gid=${finalGid}`;
 }
 
 /**
