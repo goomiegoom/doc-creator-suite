@@ -18,6 +18,7 @@ interface VoucherFormProps {
 }
 
 export function VoucherForm({ payees, data, onChange, onManagePayees }: VoucherFormProps) {
+  const [payeeOpen, setPayeeOpen] = useState(false);
   const update = (partial: Partial<VoucherData>) => onChange({ ...data, ...partial });
 
   const updateLineItem = (index: number, field: keyof LineItem, value: string | number) => {
