@@ -106,7 +106,7 @@ export function VoucherPreview({ data }: Props) {
       </div>
 
       {/* Signatures with signature image */}
-      <div className="flex justify-between text-sm mt-4">
+      <div className="flex justify-between items-end text-sm mt-4">
         <div className="text-center">
           <div>ลงชื่อ.........................................(ผู้รับเงิน)</div>
           <div>({data.payee ? `${data.payee.prefix}${data.payee.name}` : "......................................."})</div>
