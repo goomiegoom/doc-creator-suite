@@ -94,7 +94,7 @@ export function SettingsDialog({ settings, onChange, onFetchPayees, isFetching, 
               </div>
               {sigPreview && (
                 <div className="border border-border rounded p-2 bg-muted/50">
-                  <img src={sigPreview} alt="Signature preview" className="max-h-16 mx-auto" crossOrigin="anonymous" />
+                  <img src={sigPreview} alt="Signature preview" className="max-h-16 mx-auto" referrerPolicy="no-referrer" />
                 </div>
               )}
             </CardContent>

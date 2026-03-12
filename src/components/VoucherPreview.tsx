@@ -114,7 +114,7 @@ export function VoucherPreview({ data }: Props) {
         <div className="text-center">
           {data.signatureUrl ? (
             <div className="mb-2">
-              <img src={data.signatureUrl} alt="ลายเซ็น" className="mx-auto" style={{ maxHeight: "50px" }} crossOrigin="anonymous" />
+              <img src={data.signatureUrl} alt="ลายเซ็น" className="mx-auto" style={{ maxHeight: "50px" }} referrerPolicy="no-referrer" />
             </div>
           ) : (
             <div className="mb-8">ลงชื่อ.........................................(ผู้จ่ายเงิน)</div>

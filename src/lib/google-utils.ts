@@ -26,7 +26,7 @@ export function gdriveToDirectUrl(url: string): string {
   
   if (!fileId) return url; // Return as-is if not a Drive URL
   
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+  return `https://lh3.googleusercontent.com/d/${fileId}=w400`;
 }
 
 /**
