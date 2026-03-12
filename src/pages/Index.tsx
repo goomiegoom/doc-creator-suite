@@ -106,7 +106,6 @@ export default function Index() {
         const rules = Array.from(sheet.cssRules);
         rules.forEach((rule) => { cssText += rule.cssText + "\n"; });
       } catch {
-        // Cross-origin stylesheet — include via link tag
         if (sheet.href) {
           cssText += `@import url("${sheet.href}");\n`;
         }
@@ -118,14 +117,21 @@ export default function Index() {
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
       <style>
         ${cssText}
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Sarabun', sans-serif; background: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Sarabun', sans-serif !important; }
+        body { font-family: 'Sarabun', sans-serif !important; background: white; }
         @page { size: A4; margin: 15mm; }
         @media print { body { -webkit-print-color-adjust: exact; } }
       </style></head><body>${printContent.innerHTML}</body></html>
     `);
     win.document.close();
-    win.onload = () => { win.print(); };
+    // Wait for fonts to load before printing
+    win.onload = () => {
+      if (win.document.fonts && win.document.fonts.ready) {
+        win.document.fonts.ready.then(() => { win.print(); });
+      } else {
+        setTimeout(() => { win.print(); }, 1000);
+      }
+    };
   };
 
   return (
