@@ -95,10 +95,23 @@ export default function Index() {
   const handlePrint = () => {
     const printContent = document.getElementById("voucher-print");
     if (!printContent) return;
-    const win = window.open("", "_blank");
-    if (!win) return;
 
-    // Collect all stylesheets from current document
+    // Create hidden iframe for printing
+    let iframe = document.getElementById("print-iframe") as HTMLIFrameElement | null;
+    if (iframe) iframe.remove();
+    iframe = document.createElement("iframe");
+    iframe.id = "print-iframe";
+    iframe.style.position = "fixed";
+    iframe.style.top = "-10000px";
+    iframe.style.left = "-10000px";
+    iframe.style.width = "210mm";
+    iframe.style.height = "297mm";
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+
+    // Collect all stylesheets
     const styleSheets = Array.from(document.styleSheets);
     let cssText = "";
     styleSheets.forEach((sheet) => {
@@ -112,8 +125,9 @@ export default function Index() {
       }
     });
 
-    win.document.write(`
-      <html><head><title>ใบสำคัญรับเงิน ${data.docNo}</title>
+    iframeDoc.open();
+    iframeDoc.write(`
+      <html><head>
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
       <style>
         ${cssText}
@@ -123,15 +137,19 @@ export default function Index() {
         @media print { body { -webkit-print-color-adjust: exact; } }
       </style></head><body>${printContent.innerHTML}</body></html>
     `);
-    win.document.close();
-    // Wait for fonts to load before printing
-    win.onload = () => {
-      if (win.document.fonts && win.document.fonts.ready) {
-        win.document.fonts.ready.then(() => { win.print(); });
-      } else {
-        setTimeout(() => { win.print(); }, 1000);
-      }
+    iframeDoc.close();
+
+    // Wait for fonts then print
+    const doPrint = () => {
+      iframe!.contentWindow?.print();
+      setTimeout(() => iframe?.remove(), 1000);
     };
+
+    if (iframeDoc.fonts?.ready) {
+      iframeDoc.fonts.ready.then(doPrint);
+    } else {
+      setTimeout(doPrint, 1000);
+    }
   };
 
   return (
