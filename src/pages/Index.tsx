@@ -71,17 +71,6 @@ export default function Index() {
   const signatureUrl = gdriveToDirectUrl(settings.signatureGdriveUrl);
   const voucherData: VoucherData = { ...data, logoUrl, signatureUrl };
 
-  // Set favicon from logo
-  useEffect(() => {
-    if (!logoUrl) return;
-    let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-    if (!link) {
-      link = document.createElement("link");
-      link.rel = "icon";
-      document.head.appendChild(link);
-    }
-    link.href = logoUrl;
-  }, [logoUrl]);
 
   const fetchPayeesFromSheet = useCallback(async (sheetUrl?: string) => {
     const url = sheetUrl || settings.googleSheetUrl;
