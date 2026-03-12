@@ -149,6 +149,7 @@ export default function Index() {
     iframeDoc.open();
     iframeDoc.write(`
       <html><head>
+      <title>${data.docNo}</title>
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
       <style>
         ${cssText}
