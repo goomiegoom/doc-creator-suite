@@ -174,6 +174,9 @@ export default function Index() {
     // Wait for fonts then print
     const doPrint = () => {
       iframe!.contentWindow?.print();
+      // Increment counter and update docNo for next voucher
+      incrementDocCounter();
+      setData((prev) => ({ ...prev, docNo: getNextDocNo() }));
       setTimeout(() => iframe?.remove(), 1000);
     };
 
