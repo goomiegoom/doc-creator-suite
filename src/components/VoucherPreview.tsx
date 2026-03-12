@@ -36,7 +36,7 @@ export function VoucherPreview({ data }: Props) {
       {/* Header with Logo */}
       <div className="text-center mb-1">
         {data.logoUrl ? (
-          <img src={data.logoUrl} alt="Company Logo" className="mx-auto mb-2" style={{ maxHeight: "60px" }} crossOrigin="anonymous" />
+          <img src={data.logoUrl} alt="Company Logo" className="mx-auto mb-2" style={{ maxHeight: "60px" }} referrerPolicy="no-referrer" />
         ) : (
           <div className="text-xs tracking-[0.3em] text-gray-500 uppercase">Mentora Consulting</div>
         )}
