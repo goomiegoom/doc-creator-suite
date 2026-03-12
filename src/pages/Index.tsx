@@ -14,10 +14,26 @@ const today = new Date().toISOString().split("T")[0];
 const now = new Date();
 const buddhistYear = now.getFullYear() + 543;
 const month = String(now.getMonth() + 1).padStart(2, "0");
-const defaultDocNo = `PV-${buddhistYear}-${month}01`;
+const monthKey = `${buddhistYear}-${month}`;
+
+function getNextDocNo(): string {
+  try {
+    const counters = JSON.parse(localStorage.getItem("mentora-doc-counters") || "{}");
+    const num = (counters[monthKey] || 0) + 1;
+    return `PV-${buddhistYear}-${month}${String(num).padStart(2, "0")}`;
+  } catch {
+    return `PV-${buddhistYear}-${month}01`;
+  }
+}
+
+function incrementDocCounter() {
+  const counters = JSON.parse(localStorage.getItem("mentora-doc-counters") || "{}");
+  counters[monthKey] = (counters[monthKey] || 0) + 1;
+  localStorage.setItem("mentora-doc-counters", JSON.stringify(counters));
+}
 
 const initialData: VoucherData = {
-  docNo: defaultDocNo,
+  docNo: getNextDocNo(),
   date: today,
   paymentMethod: "โอนเงิน",
   payee: null,
