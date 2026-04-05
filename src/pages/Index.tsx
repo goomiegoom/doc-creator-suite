@@ -92,6 +92,20 @@ export default function Index() {
         ];
         for (const proxyUrl of proxyUrls) {
           try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+            const r = await fetch(proxyUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (r.ok) {
+              res = r;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        for (const proxyUrl of proxyUrls) {
+          try {
             const r = await fetch(proxyUrl);
             if (r.ok) {
               res = r;
