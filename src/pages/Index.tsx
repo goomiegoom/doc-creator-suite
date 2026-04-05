@@ -82,13 +82,22 @@ export default function Index() {
         toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
         return;
       }
-      let res: Response;
-      try {
-        res = await fetch(csvUrl);
-      } catch {
-        // CORS blocked — try via corsproxy
-        res = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
+      // Try multiple approaches to handle CORS
+      let res: Response | null = null;
+      const proxyUrls = [
+        csvUrl, // Direct (works if published)
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`,
+        `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`,
+      ];
+      for (const proxyUrl of proxyUrls) {
+        try {
+          const r = await fetch(proxyUrl);
+          if (r.ok) { res = r; break; }
+        } catch {
+          continue;
+        }
       }
+      if (!res) throw new Error("All fetch methods failed");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csv = await res.text();
       const newPayees = parseCsvToPayees(csv);
