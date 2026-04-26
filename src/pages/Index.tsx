@@ -85,16 +85,25 @@ export default function Index() {
           return;
         }
 
-        // 1. ลองดึงข้อมูลโดยตรงก่อน (Google Sheets CSV มักจะไม่ติด CORS)
-        let res = await fetch(csvUrl);
+        const proxies = [
+          csvUrl,
+          `https://corsproxy.io/?url=${encodeURIComponent(csvUrl)}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`,
+        ];
 
-        // 2. ถ้าดึงตรงๆ ไม่ได้ ค่อยใช้ Proxy เป็นตัวสำรอง (เลือกใช้แค่ตัวเดียวที่เสถียรที่สุด)
-        if (!res.ok) {
-          const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
-          res = await fetch(fallbackUrl);
+        let res: Response | null = null;
+        let lastError: unknown;
+        for (const url of proxies) {
+          try {
+            const r = await fetch(url);
+            if (r.ok) { res = r; break; }
+            lastError = new Error(`HTTP ${r.status}`);
+          } catch (e) {
+            lastError = e;
+          }
         }
 
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        if (!res) throw lastError;
 
         const csv = await res.text();
         const newPayees = parseCsvToPayees(csv);
