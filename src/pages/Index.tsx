@@ -136,8 +136,9 @@ export default function Index() {
         setPayees(newPayees);
         toast.success(`ดึงข้อมูลผู้รับเงิน ${newPayees.length} รายการสำเร็จ`);
       } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
         console.error("Sheet fetch error:", err);
-        toast.error("ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ — ตรวจสอบ API Key และ URL");
+        toast.error(`ดึงข้อมูลไม่ได้: ${msg}`);
       } finally {
         setIsFetching(false);
       }
