@@ -81,16 +81,24 @@ export default function Index() {
         let newPayees: Payee[] = [];
 
         if (settings.googleApiKey) {
-          const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          // Skip /d/e/ (published URL prefix) — match real sheet ID only
+          const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]{10,})/);
           if (!match) {
-            toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
+            toast.error("URL ไม่ถูกต้อง — ใส่ sharing link ปกติ (ไม่ใช่ Publish to web link)");
             setIsFetching(false);
             return;
           }
           const sheetId = match[1];
           const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Payees?key=${settings.googleApiKey}`;
           const res = await fetch(apiUrl);
-          if (!res.ok) throw new Error(`API Error: ${res.status}`);
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            const msg = body?.error?.message || `HTTP ${res.status}`;
+            if (res.status === 403) toast.error(`API Key ถูกบล็อก: ${msg}`);
+            else if (res.status === 404) toast.error("ไม่พบ sheet ชื่อ 'Payees' — ตรวจสอบชื่อ tab");
+            else toast.error(`Google API Error: ${msg}`);
+            return;
+          }
           const json = await res.json();
           newPayees = parseApiResponseToPayees(json.values || []);
         } else {
