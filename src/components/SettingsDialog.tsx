@@ -36,7 +36,7 @@ export function SettingsDialog({ settings, onChange, onFetchPayees, isFetching, 
             </CardHeader>
             <CardContent className="space-y-2">
               <div>
-                <Label className="text-xs">URL ของ Google Sheet (Publish to web หรือ share link)</Label>
+                <Label className="text-xs">Google Sheet URL (sharing link)</Label>
                 <Input
                   value={settings.googleSheetUrl}
                   onChange={(e) => onChange({ ...settings, googleSheetUrl: e.target.value })}
@@ -44,8 +44,18 @@ export function SettingsDialog({ settings, onChange, onFetchPayees, isFetching, 
                   className="h-9 text-xs"
                 />
               </div>
+              <div>
+                <Label className="text-xs">Google API Key</Label>
+                <Input
+                  value={settings.googleApiKey}
+                  onChange={(e) => onChange({ ...settings, googleApiKey: e.target.value })}
+                  placeholder="AIzaSy..."
+                  className="h-9 text-xs font-mono"
+                  type="password"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
-                ⚠️ ต้อง Publish Sheet ก่อน: File → Share → Publish to web → เลือก sheet "ฐานข้อมูลผู้ขาย" → Publish
+                ใส่ API Key เพื่อดึงข้อมูลผ่าน Google Sheets API (ไม่ต้อง Publish to web) — ต้องแชร์ Sheet เป็น "Anyone with the link"
               </p>
               <Button size="sm" onClick={onFetchPayees} disabled={!settings.googleSheetUrl || isFetching} className="h-8 text-xs">
                 <RefreshCw className={`mr-1 h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />

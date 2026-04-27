@@ -6,7 +6,7 @@ import { PayeeManager } from "@/components/PayeeManager";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { defaultPayees } from "@/data/payees";
 import { Payee, VoucherData, AppSettings } from "@/types/voucher";
-import { sheetToCsvUrl, parseCsvToPayees, gdriveToDirectUrl } from "@/lib/google-utils";
+import { sheetToCsvUrl, parseCsvToPayees, parseApiResponseToPayees, gdriveToDirectUrl } from "@/lib/google-utils";
 import { Printer, Settings } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,7 +50,7 @@ function loadSettings(): AppSettings {
     const saved = localStorage.getItem("mentora-settings");
     if (saved) return JSON.parse(saved);
   } catch {}
-  return { googleSheetUrl: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
+  return { googleSheetUrl: "", googleApiKey: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
 }
 
 export default function Index() {
@@ -75,56 +75,66 @@ export default function Index() {
     async (sheetUrl?: string) => {
       const url = sheetUrl || settings.googleSheetUrl;
       if (!url) return;
-      
+
       setIsFetching(true);
       try {
-        const csvUrl = sheetToCsvUrl(url);
-        if (!csvUrl) {
-          toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
-          setIsFetching(false);
-          return;
-        }
+        let newPayees: Payee[] = [];
 
-        const proxies = [
-          csvUrl,
-          `https://corsproxy.io/?url=${encodeURIComponent(csvUrl)}`,
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`,
-        ];
-
-        let res: Response | null = null;
-        let lastError: unknown;
-        for (const url of proxies) {
-          try {
-            const r = await fetch(url);
-            if (r.ok) { res = r; break; }
-            lastError = new Error(`HTTP ${r.status}`);
-          } catch (e) {
-            lastError = e;
+        if (settings.googleApiKey) {
+          const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (!match) {
+            toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
+            setIsFetching(false);
+            return;
           }
+          const sheetId = match[1];
+          const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Payees?key=${settings.googleApiKey}`;
+          const res = await fetch(apiUrl);
+          if (!res.ok) throw new Error(`API Error: ${res.status}`);
+          const json = await res.json();
+          newPayees = parseApiResponseToPayees(json.values || []);
+        } else {
+          const csvUrl = sheetToCsvUrl(url);
+          if (!csvUrl) {
+            toast.error("URL ไม่ถูกต้อง กรุณาใส่ link Google Sheet");
+            setIsFetching(false);
+            return;
+          }
+          const proxies = [
+            csvUrl,
+            `https://corsproxy.io/?url=${encodeURIComponent(csvUrl)}`,
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`,
+          ];
+          let res: Response | null = null;
+          let lastError: unknown;
+          for (const proxyUrl of proxies) {
+            try {
+              const r = await fetch(proxyUrl);
+              if (r.ok) { res = r; break; }
+              lastError = new Error(`HTTP ${r.status}`);
+            } catch (e) {
+              lastError = e;
+            }
+          }
+          if (!res) throw lastError;
+          const csv = await res.text();
+          newPayees = parseCsvToPayees(csv);
         }
-
-        if (!res) throw lastError;
-
-        const csv = await res.text();
-        const newPayees = parseCsvToPayees(csv);
 
         if (newPayees.length === 0) {
-          toast.error("ไม่พบข้อมูลผู้รับเงินใน Sheet — ตรวจสอบว่า Publish ถูก sheet");
+          toast.error("ไม่พบข้อมูลผู้รับเงินใน Sheet — ตรวจสอบชื่อ sheet ว่าเป็น 'Payees'");
           return;
         }
-
         setPayees(newPayees);
         toast.success(`ดึงข้อมูลผู้รับเงิน ${newPayees.length} รายการสำเร็จ`);
       } catch (err) {
         console.error("Sheet fetch error:", err);
-        toast.error(
-          "ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ — ตรวจสอบว่า Publish to web (File → Share → Publish to web) แล้ว"
-        );
+        toast.error("ไม่สามารถดึงข้อมูลจาก Google Sheet ได้ — ตรวจสอบ API Key และ URL");
       } finally {
         setIsFetching(false);
       }
     },
-    [settings.googleSheetUrl]
+    [settings.googleSheetUrl, settings.googleApiKey]
   );
 
   const handlePrint = () => {

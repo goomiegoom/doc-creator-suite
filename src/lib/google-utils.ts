@@ -58,6 +58,35 @@ export function sheetToCsvUrl(url: string, gid = "0"): string {
 }
 
 /**
+ * Parse Sheets API v4 values array into Payee objects
+ */
+export function parseApiResponseToPayees(values: string[][]): Payee[] {
+  if (values.length < 2) return [];
+  return values.slice(1).map((cols, i) => {
+    const get = (idx: number) => (cols[idx] || "").trim();
+    const taxIdRaw = get(0);
+    let taxId = taxIdRaw;
+    if (taxIdRaw.includes("E+") || taxIdRaw.includes("e+")) {
+      taxId = Number(taxIdRaw).toFixed(0);
+    }
+    return {
+      id: `sheet-${i}`,
+      taxId,
+      prefix: get(1),
+      name: get(2),
+      nameEn: get(3),
+      codename: get(4),
+      address: get(5),
+      bank: get(6),
+      branch: get(7),
+      accountNo: get(8),
+      type: "บุคคลธรรมดา",
+      whtRate: 3,
+    };
+  }).filter((p) => p.name);
+}
+
+/**
  * Parse CSV text into Payee objects
  * Sheet "Payees" columns: Tax ID, Pref., Thai Name, English Name, Codename, Address, Bank, Branch, Account no.
  */
