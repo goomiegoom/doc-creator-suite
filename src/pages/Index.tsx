@@ -73,7 +73,7 @@ export default function Index() {
 
  const fetchPayeesFromSheet = useCallback(
     async (sheetUrl?: string) => {
-      const url = sheetUrl || settings.googleSheetUrl;
+      const url = typeof sheetUrl === "string" ? sheetUrl : settings.googleSheetUrl;
       if (!url) return;
 
       setIsFetching(true);
