@@ -45,12 +45,20 @@ const initialData: VoucherData = {
   signatureUrl: "",
 };
 
+const DEFAULT_SETTINGS: AppSettings = {
+  googleSheetUrl: "https://docs.google.com/spreadsheets/d/1xIwmIvmpXxnZzRM453pbhLtBF1grvU1cRXVf8Yp-0eE/edit?usp=sharing",
+  googleApiKey: "AIzaSyA6y8wG-8xDSuCKkNNpTGUBS8RjYGrjTjE",
+  googleOAuthClientId: "294154847946-9itp5mbe6bvi4svbdvovqe9piejuqko0.apps.googleusercontent.com",
+  logoGdriveUrl: "https://drive.google.com/file/d/1R96DAMHAtqTzVmVwmjcfereblQwNHF1I/view?usp=drive_link",
+  signatureGdriveUrl: "https://drive.google.com/file/d/1D7ckYFvrxlFHZuRHsDVJmUQ6VP38Xydj/view?usp=drive_link",
+};
+
 function loadSettings(): AppSettings {
   try {
     const saved = localStorage.getItem("mentora-settings");
-    if (saved) return JSON.parse(saved);
+    if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
   } catch {}
-  return { googleSheetUrl: "", googleApiKey: "", googleOAuthClientId: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
+  return DEFAULT_SETTINGS;
 }
 
 function loadPayees(): Payee[] {
