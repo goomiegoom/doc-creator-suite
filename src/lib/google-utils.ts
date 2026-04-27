@@ -1,5 +1,69 @@
 import { Payee } from "@/types/voucher";
 
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (cfg: {
+            client_id: string;
+            scope: string;
+            callback: (r: { access_token?: string; error?: string }) => void;
+          }) => { requestAccessToken: (opts?: { prompt?: string }) => void };
+        };
+      };
+    };
+  }
+}
+
+function loadGIS(): Promise<void> {
+  return new Promise((resolve) => {
+    if (window.google?.accounts) { resolve(); return; }
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.onload = () => resolve();
+    document.head.appendChild(s);
+  });
+}
+
+export async function getOAuthToken(clientId: string): Promise<string> {
+  await loadGIS();
+  return new Promise((resolve, reject) => {
+    const client = window.google!.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: "https://www.googleapis.com/auth/spreadsheets",
+      callback: (r) => {
+        if (r.error || !r.access_token) reject(new Error(r.error || "no token"));
+        else resolve(r.access_token);
+      },
+    });
+    client.requestAccessToken({ prompt: "" });
+  });
+}
+
+export async function appendPayeeToSheet(
+  accessToken: string,
+  sheetId: string,
+  payee: Omit<Payee, "id">
+): Promise<void> {
+  const row = [
+    payee.taxId, payee.prefix, payee.name, payee.nameEn,
+    payee.codename, payee.address, payee.bank, payee.branch, payee.accountNo,
+  ];
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Payees:append?valueInputOption=USER_ENTERED`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ values: [row] }),
+    }
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error?.message || `HTTP ${res.status}`);
+  }
+}
+
 /**
  * Convert a Google Drive sharing URL to a direct image URL
  * Supports: /file/d/ID/view, /open?id=ID, /uc?id=ID

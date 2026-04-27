@@ -50,7 +50,7 @@ function loadSettings(): AppSettings {
     const saved = localStorage.getItem("mentora-settings");
     if (saved) return JSON.parse(saved);
   } catch {}
-  return { googleSheetUrl: "", googleApiKey: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
+  return { googleSheetUrl: "", googleApiKey: "", googleOAuthClientId: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
 }
 
 export default function Index() {
@@ -239,7 +239,7 @@ export default function Index() {
         </div>
       </div>
 
-      <PayeeManager payees={payees} onChange={setPayees} open={payeeDialogOpen} onOpenChange={setPayeeDialogOpen} />
+      <PayeeManager payees={payees} onChange={setPayees} open={payeeDialogOpen} onOpenChange={setPayeeDialogOpen} settings={settings} />
       <SettingsDialog
         settings={settings}
         onChange={setSettings}

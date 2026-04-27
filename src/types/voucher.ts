@@ -35,6 +35,7 @@ export interface VoucherData {
 export interface AppSettings {
   googleSheetUrl: string;
   googleApiKey: string;
+  googleOAuthClientId: string;
   logoGdriveUrl: string;
   signatureGdriveUrl: string;
 }
