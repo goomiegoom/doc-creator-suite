@@ -57,7 +57,7 @@ export function SettingsDialog({ settings, onChange, onFetchPayees, isFetching, 
               <p className="text-xs text-muted-foreground">
                 ใส่ API Key เพื่อดึงข้อมูลผ่าน Google Sheets API (ไม่ต้อง Publish to web) — ต้องแชร์ Sheet เป็น "Anyone with the link"
               </p>
-              <Button size="sm" onClick={onFetchPayees} disabled={!settings.googleSheetUrl || isFetching} className="h-8 text-xs">
+              <Button size="sm" onClick={() => onFetchPayees()} disabled={!settings.googleSheetUrl || isFetching} className="h-8 text-xs">
                 <RefreshCw className={`mr-1 h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
                 {isFetching ? "กำลังดึงข้อมูล..." : "ดึงข้อมูลผู้รับเงิน"}
               </Button>
