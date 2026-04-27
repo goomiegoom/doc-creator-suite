@@ -46,11 +46,11 @@ const initialData: VoucherData = {
 };
 
 const DEFAULT_SETTINGS: AppSettings = {
-  googleSheetUrl: "https://docs.google.com/spreadsheets/d/1xIwmIvmpXxnZzRM453pbhLtBF1grvU1cRXVf8Yp-0eE/edit?usp=sharing",
-  googleApiKey: "AIzaSyA6y8wG-8xDSuCKkNNpTGUBS8RjYGrjTjE",
-  googleOAuthClientId: "294154847946-9itp5mbe6bvi4svbdvovqe9piejuqko0.apps.googleusercontent.com",
-  logoGdriveUrl: "https://drive.google.com/file/d/1R96DAMHAtqTzVmVwmjcfereblQwNHF1I/view?usp=drive_link",
-  signatureGdriveUrl: "https://drive.google.com/file/d/1D7ckYFvrxlFHZuRHsDVJmUQ6VP38Xydj/view?usp=drive_link",
+  googleSheetUrl: import.meta.env.VITE_GOOGLE_SHEET_URL ?? "",
+  googleApiKey: import.meta.env.VITE_GOOGLE_API_KEY ?? "",
+  googleOAuthClientId: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ?? "",
+  logoGdriveUrl: import.meta.env.VITE_LOGO_GDRIVE_URL ?? "",
+  signatureGdriveUrl: import.meta.env.VITE_SIGNATURE_GDRIVE_URL ?? "",
 };
 
 function loadSettings(): AppSettings {
