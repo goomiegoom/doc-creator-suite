@@ -53,8 +53,16 @@ function loadSettings(): AppSettings {
   return { googleSheetUrl: "", googleApiKey: "", googleOAuthClientId: "", logoGdriveUrl: "", signatureGdriveUrl: "" };
 }
 
+function loadPayees(): Payee[] {
+  try {
+    const saved = localStorage.getItem("mentora-payees");
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return defaultPayees;
+}
+
 export default function Index() {
-  const [payees, setPayees] = useState<Payee[]>(defaultPayees);
+  const [payees, setPayees] = useState<Payee[]>(loadPayees);
   const [data, setData] = useState<VoucherData>(initialData);
   const [payeeDialogOpen, setPayeeDialogOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -65,6 +73,11 @@ export default function Index() {
   useEffect(() => {
     localStorage.setItem("mentora-settings", JSON.stringify(settings));
   }, [settings]);
+
+  // Persist payees
+  useEffect(() => {
+    localStorage.setItem("mentora-payees", JSON.stringify(payees));
+  }, [payees]);
 
   // Derive image URLs from settings
   const logoUrl = gdriveToDirectUrl(settings.logoGdriveUrl);
