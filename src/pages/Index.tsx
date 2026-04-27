@@ -74,6 +74,7 @@ export default function Index() {
  const fetchPayeesFromSheet = useCallback(
     async (sheetUrl?: string) => {
       const url = typeof sheetUrl === "string" ? sheetUrl : settings.googleSheetUrl;
+      console.log("fetchPayees:", { urlType: typeof url, url, apiKey: !!settings.googleApiKey });
       if (!url) return;
 
       setIsFetching(true);
@@ -137,7 +138,9 @@ export default function Index() {
         toast.success(`ดึงข้อมูลผู้รับเงิน ${newPayees.length} รายการสำเร็จ`);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
+        const stack = err instanceof Error ? err.stack : "";
         console.error("Sheet fetch error:", err);
+        console.error("Stack:", stack);
         toast.error(`ดึงข้อมูลไม่ได้: ${msg}`);
       } finally {
         setIsFetching(false);
